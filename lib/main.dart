@@ -1,7 +1,9 @@
-import 'package:backend/Cred_home.dart';
+import 'package:backend/auth/login.dart';
+import 'package:backend/auth/task_provider1.dart';
 import 'package:backend/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +16,10 @@ class Myapp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: CredHomeScreen(),
-    );
+    return MultiProvider(providers: [
+       ChangeNotifierProvider(
+      create: (_)=> taskproviderauth()),
+    ],
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: Login()));
   }
 }

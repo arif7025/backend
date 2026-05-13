@@ -2,25 +2,60 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class CredHomeScreen extends StatefulWidget {
-  const CredHomeScreen({super.key});
+class Cred1Home extends StatefulWidget {
+  const Cred1Home({super.key});
 
   @override
-  State<CredHomeScreen> createState() => _CredHomeScreenState();
+  State<Cred1Home> createState() => _Cred1HomeState();
 }
 
-class _CredHomeScreenState extends State<CredHomeScreen> {
-  // List<String> Task = ['task 1 :', 'task 2 :', 'task 3 :', 'task 4 :'];
-  // List<String> Description = [
-  //   'description :',
-  //   'description :',
-  //   'description :',
-  //   'description :',
-  // ];
+class _Cred1HomeState extends State<Cred1Home> {
   TextEditingController textcontroller = TextEditingController();
   TextEditingController descriptioncontroller = TextEditingController();
   CollectionReference ref = FirebaseFirestore.instance.collection('Task');
   List<Map<String, dynamic>> alltask = [];
+  bool isedit = false;
+  String editingid = '';
+  Future<List<Map<String, dynamic>>> GetTask() async {
+    final tasks = await ref.get();
+    return tasks.docs.map((e) {
+      return {'title': e['task'], 'description': e['description'], 'id': e.id};
+    }).toList();
+  }
+
+  Future<void> AddTask() async {
+    String unicid = DateTime.now().millisecondsSinceEpoch.toString();
+    final doc = ref.doc(unicid); //if  ou want a specific id we can use
+    await doc.set({
+      'task': textcontroller.text,
+      'description': descriptioncontroller.text,
+    });
+    textcontroller.clear();
+    descriptioncontroller.clear();
+    loadTasks();
+  }
+
+  Future<void> UpdateTask(String id) async {
+    await ref.doc(id).update({
+      'task': textcontroller.text,
+      'description': descriptioncontroller.text,
+    });
+    loadTasks();
+    textcontroller.clear();
+    descriptioncontroller.clear();
+  }
+
+  Future<void> loadTasks() async {
+    alltask = await GetTask(); // wait for data
+    setState(() {}); // update UI
+  }
+
+  @override
+  void initState() {
+    loadTasks();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,40 +85,21 @@ class _CredHomeScreenState extends State<CredHomeScreen> {
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 // ref.add({'task': textcontroller.text,'description':descriptioncontroller.text});
                 // ref.doc('task 1').set({'task': textcontroller.text,'description':descriptioncontroller.text});//if  ou want a specific id we can use
-                String unicid = DateTime.now().millisecondsSinceEpoch
-                    .toString();
-                final doc = ref.doc(
-                  unicid,
-                ); //if  ou want a specific id we can use
-                await doc.set({
-                  'task': textcontroller.text,
-                  'description': descriptioncontroller.text,
-                });
-                textcontroller.clear();
-                descriptioncontroller.clear();
-
-                Fluttertoast.showToast(msg: ' added success fully');
-              },
-              child: Text("add task"),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () async {
-                final tasks = await ref.get();
-                for (var task in tasks.docs) {
-                  alltask.add({
-                    'id': task.id,
-                    'title': task['task'],
-                    'decription': task['description'],
-                  });
+                if (isedit == true) {
+                  UpdateTask(editingid);
+                  Fluttertoast.showToast(msg: ' Update success fully');
+                } else {
+                  AddTask();
+                  Fluttertoast.showToast(msg: ' added success fully');
                 }
-                setState(() {});
+                isedit = false;
               },
-              child: Text('Get'),
+              child: Text(isedit ? "Update Task" : "Add Task"),
             ),
+
             SizedBox(height: 15),
             Expanded(
               child: ListView.builder(
@@ -93,12 +109,24 @@ class _CredHomeScreenState extends State<CredHomeScreen> {
                   return Card(
                     child: ListTile(
                       title: Text(alltask[index]['title']),
-                      subtitle: Text(alltask[index]['decription']),
+                      subtitle: Text(alltask[index]['description']),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isedit = true;
+                                editingid = alltask[index]['id'];
+                              });
+                              textcontroller.text = alltask[index]["title"];
+                              descriptioncontroller.text =
+                                  alltask[index]['description'];
+                            },
+
+                            icon: Icon(Icons.edit),
+                          ),
                           IconButton(
                             onPressed: () async {
                               await ref.doc(alltask[index]['id']).delete();
