@@ -1,10 +1,10 @@
-import 'package:backend/task_model.dart';
-import 'package:backend/task_service.dart';
+import 'package:backend/streambulder/stram_task_model.dart';
+import 'package:backend/streambulder/stream_task_service.dart';
 import 'package:flutter/material.dart';
 
-class TaskProvider2 extends ChangeNotifier {
-  TaskService service = TaskService();
-  List<TaskModel> storingdata = [];
+class taskproviderauth extends ChangeNotifier {
+  TaskServiceauth service = TaskServiceauth();
+
   bool isEdit = false;
   String? editingid ;
   void startEdit(String editid) {
@@ -15,17 +15,18 @@ class TaskProvider2 extends ChangeNotifier {
 
   Future<void> adding(String title, String description) async {
     await service.addTask(TaskModel(title: title, description: description));
-   await geting();
+    geting();
   }
 
-  Future<void> geting() async {
-    storingdata = await service.getTask();
-    notifyListeners();
+
+  Stream<List<TaskModel>> geting()  {
+    return service.getTask();
+  
   }
 
   Future<void> deleting(String id) async {
     await service.delettask(id);
-   await geting();
+    geting();
   }
 
   Future<void> updating(String title, String description) async {
@@ -34,6 +35,6 @@ class TaskProvider2 extends ChangeNotifier {
     );
     editingid = null;
     isEdit = false;
-  await  geting();
+    geting();
   }
 }
