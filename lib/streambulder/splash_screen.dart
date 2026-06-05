@@ -21,6 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
  
   
   Future<void> goto() async {
+    
     await Future.delayed(Duration(seconds: 2));
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {

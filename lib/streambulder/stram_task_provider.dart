@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 
 class taskproviderauth extends ChangeNotifier {
   TaskServiceauth service = TaskServiceauth();
+  String searchText="";
+
+  void searchTask(String value) {
+    searchText = value.toLowerCase();
+    notifyListeners();
+  }
 
   bool isEdit = false;
-  String? editingid ;
+  String? editingid;
   void startEdit(String editid) {
     isEdit = true;
     editingid = editid;
@@ -18,10 +24,8 @@ class taskproviderauth extends ChangeNotifier {
     geting();
   }
 
-
-  Stream<List<TaskModel>> geting()  {
+  Stream<List<TaskModel>> geting() {
     return service.getTask();
-  
   }
 
   Future<void> deleting(String id) async {

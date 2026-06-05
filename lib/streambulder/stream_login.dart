@@ -97,7 +97,7 @@ class _LoginState extends State<Login> {
 
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => SiginupScreen()),
                     );

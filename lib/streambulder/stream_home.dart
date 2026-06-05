@@ -15,6 +15,7 @@ class Cred_modelScreen extends StatefulWidget {
 class _Cred_modelState extends State<Cred_modelScreen> {
   TextEditingController titlecontroller = TextEditingController();
   TextEditingController desccontroller = TextEditingController();
+  TextEditingController serchcontroller = TextEditingController();
   late Future<void> taskfuture;
   @override
   void initState() {
@@ -47,6 +48,20 @@ class _Cred_modelState extends State<Cred_modelScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            TextFormField(
+              onChanged: (value) {
+                provider.searchTask(value);
+              },
+              controller: serchcontroller,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                hintText: "Search Task",
+              ),
+            ),
+            SizedBox(height: 20),
+
             TextFormField(
               controller: titlecontroller,
               decoration: InputDecoration(
@@ -111,11 +126,19 @@ class _Cred_modelState extends State<Cred_modelScreen> {
                   if (snapshot.data!.isEmpty) {
                     return Text("no task Added");
                   }
+                  final tasks = snapshot.data!.where((element) {
+                    return element.title.toLowerCase().contains(
+                          provider.searchText,
+                        ) ||
+                        element.description.toLowerCase().contains(
+                          provider.searchText,
+                        );
+                  }).toList();
                   return ListView.builder(
-                    itemCount: snapshot.data!.length,
+                    itemCount: tasks.length,
 
                     itemBuilder: (context, index) {
-                      final task = snapshot.data![index];
+                      final task = tasks[index];
                       return Card(
                         child: ListTile(
                           title: Text(task.title),
